@@ -11,7 +11,7 @@ import {
   Image,
   InputNumber,
   Spin,
-  Avatar
+  Tag
 } from 'antd';
 
 function App() {
@@ -48,15 +48,27 @@ function App() {
       dataIndex: 'fuel',
       key: 'fuel',
     },
+    // {
+    //   title: 'Status',
+    //   dataIndex: 'status',
+    //   key: 'status',
+    //   render: (item) => (
+    //     <>
+    //       {item == 'ready' && <Avatar style={{ backgroundColor: ColorList[2], verticalAlign: 'middle' }} size="small" />}
+    //       {item == 'success' && <Avatar style={{ backgroundColor: ColorList[3], verticalAlign: 'middle' }} size="small" />}
+    //       {item == 'failed' && <Avatar style={{ backgroundColor: ColorList[0], verticalAlign: 'middle' }} size="small" />}
+    //     </>
+    //   )
+    // },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (item) => (
+      title: 'Rank',
+      dataIndex: 'rank',
+      key: 'rank',
+      render: (item, record) => (
         <>
-          {item == 'ready' && <Avatar style={{ backgroundColor: ColorList[2], verticalAlign: 'middle' }} size="small" />}
-          {item == 'success' && <Avatar style={{ backgroundColor: ColorList[3], verticalAlign: 'middle' }} size="small" />}
-          {item == 'failed' && <Avatar style={{ backgroundColor: ColorList[0], verticalAlign: 'middle' }} size="small" />}
+          {record.status == 'ready' && '-'}
+          {record.status == 'success' && <span>{record.position + 1}</span>}
+          {record.status == 'failed' && <span>Loser</span>}
         </>
       )
     }
@@ -91,13 +103,13 @@ function App() {
       {fuel: parseInt(datas[0][2][1]), speed: parseInt(datas[0][2][2])},
     ];
     
-    setIdealSpeed((parseInt(datas[1]) / 100).toFixed(2));
+    setIdealSpeed((parseInt(datas[1]) / 100).toFixed(0));
 
     setPlayers(players.map((item, index) => {
       return {
         ...item,
         fuel: data[index].fuel,
-        speed: (data[index].speed / 100).toFixed(2)
+        speed: (data[index].speed / 100).toFixed(0)
       }
     }));
   }
@@ -147,7 +159,7 @@ function App() {
         setPlayers(players.map(item => {
           return {
             ...item,
-            fuel: (item.fuel - parseFloat(item.speed) * item.fuel / parseFloat(idealSpeed)).toFixed(2)
+            fuel: (parseInt(item.fuel) - parseInt(item.speed))
           }
         }));
       }, 9000);
@@ -165,12 +177,19 @@ function App() {
   return (
     <div className='h-100'>
       <Spin id="spin" tip="Loading..." size='large' style={{width: "100%", height: "100%"}} spinning={isLoading}>
-        <Row className='h-25 overflow-y scrollbar-none'>
+        <Row className='h-25'>
           <Col className='player-table' span={24}>
             <Table
               columns={columns}
               dataSource={players}
               pagination={false}
+              rowClassName={(record, index) => {
+                if (record.status == 'success')
+                  return 'winner'
+                if (record.status == 'failed')
+                  return 'loser'
+                return ''
+              }}
             />
           </Col>
         </Row>

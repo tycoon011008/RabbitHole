@@ -283,3 +283,23 @@ background: url('https://i.ibb.co/SybbN1D/tunnel-dark.png');
 .scrollbar-none {
   scrollbar-width: none;
 }
+
+.winner {
+  background-color: #87d068;
+}
+
+.loser {
+  background-color: #f56a00;
+}
+
+td {
+  text-align: center;
+  padding: 16px 16px;
+}
+
+@media screen and (max-width: 600px) {
+  td {
+    text-align: center;
+    padding: 10px 10px !important;
+  }    
+}
