@@ -17,5 +17,8 @@ module.exports = {
 			url: 'https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914',
 			accounts: ["0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c"],
 		}
+	},
+	etherscan: {
+		apiKey: "KBJB6EM7K4YK1HZ9MXTUB3T6XADADC8FGX"	// Sepolia API key
 	}
 };

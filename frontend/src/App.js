@@ -15,6 +15,7 @@ import {
 } from 'antd';
 
 function App() {
+  const [flag, setFlag] = useState(false);
   const [account, setAccount] = useState();
   const { sdk, connected, connecting, provider, chainId } = useSDK();
   const [speed, setSpeed] = useState(1);
@@ -28,8 +29,8 @@ function App() {
   
   const [players, setPlayers] = useState([
     {key: '1', id: 'Player 1', player: 'Bot 1', src: 'https://i.ibb.co/SN7JyMF/sheeepy.png', fuel: 50, speed: 5, status: 'ready', position: 0},
-    {key: '2', id: 'Player 2', player: 'Bot 2', src: 'https://i.ibb.co/vXGDsDD/blacksheep.png', fuel: 50, speed: 5, status: 'ready', position: 0},
-    {key: '3', id: 'Player 3', player: 'Player', src: 'https://i.ibb.co/SN7JyMF/sheeepy.png', fuel: 50, speed: 5, status: 'ready', position: 0}
+    {key: '2', id: 'Player 2', player: 'Bot 2', src: 'https://i.ibb.co/SN7JyMF/sheeepy.png', fuel: 50, speed: 5, status: 'ready', position: 0},
+    {key: '3', id: 'Player 3', player: 'Player', src: 'https://i.ibb.co/vXGDsDD/blacksheep.png', fuel: 50, speed: 5, status: 'ready', position: 0}
   ])
 
   const columns = [
@@ -42,11 +43,13 @@ function App() {
       title: 'Speed',
       dataIndex: 'speed',
       key: 'speed',
+      render: item => flag == false ? '-' : item
     },
     {
       title: 'Fuel',
       dataIndex: 'fuel',
       key: 'fuel',
+      render: item => flag == false ? '-' : item
     },
     // {
     //   title: 'Status',
@@ -83,6 +86,20 @@ function App() {
     }
   };
 
+  const getData = async () => {
+    setIsLoading(true);
+    const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914");
+    const signer = new ethers.Wallet("0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c", provider);
+    const contract = new ethers.Contract("0xDaD08162b85b036F80Ed64DFE43e566a0D20a209", rabbit.abi, signer);
+
+    const tx = await contract.setPlayerSpeed(speed * 100);
+    await tx.wait();
+
+    const datas = await contract.getPlayers();
+    setIsLoading(false);
+    return datas;
+  }
+
   const handleChangeSpeed = async () => {
     if (state == 'start') {
       return;
@@ -90,13 +107,15 @@ function App() {
     setIsLoading(true);
     const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914");
     const signer = new ethers.Wallet("0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c", provider);
-    const contract = new ethers.Contract("0x6eDc7ECCcA03c55872ee286cB729c410ef325Fd7", rabbit.abi, signer);
-
+    const contract = new ethers.Contract("0xDaD08162b85b036F80Ed64DFE43e566a0D20a209", rabbit.abi, signer);
+    
     const tx = await contract.setPlayerSpeed(speed * 100);
     await tx.wait();
-
+    
     const datas = await contract.getPlayers();
+    setFlag(true);
     setIsLoading(false);
+    // const datas = getData();
     let data = [
       {fuel: parseInt(datas[0][0][1]), speed: parseInt(datas[0][0][2])},
       {fuel: parseInt(datas[0][1][1]), speed: parseInt(datas[0][1][2])},
@@ -170,9 +189,43 @@ function App() {
           ...item,
           status: parseFloat(item.fuel) >= 0 ? item.position == last ? last != 0 ? 'failed': 'success' : 'success' : 'failed'
         }
-      }))
+      }));
+      setData();
     }
   }, [phase]);
+
+  // useEffect(() => {
+  //   if (flag == false) {
+  //     setFlag(true);
+  //     const datas = getData();
+  //     console.log(datas);
+  //     setPlayers(players.map(item => {
+  //       if (datas[0][2] != null) {
+  //         setPlayers(players.map((item, index) => {
+  //           if (index == 2) {
+  //             return {
+  //               ...item,
+  //               fuel: datas[0][2][1]
+  //             }
+  //           }
+  //           return item;
+  //         }))
+  //       }
+  //     }))
+  //   }
+  // }, []);
+
+  const setData = async () => {
+    setIsLoading(true);
+    const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914");
+    const signer = new ethers.Wallet("0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c", provider);
+    const contract = new ethers.Contract("0xDaD08162b85b036F80Ed64DFE43e566a0D20a209", rabbit.abi, signer);
+
+    const index = players.findIndex(item => item.key == '3');
+    const tx = await contract.setPlayerData(players[index].fuel);
+    await tx.wait();
+    setIsLoading(false);
+  }
 
   return (
     <div className='h-100'>
@@ -239,14 +292,14 @@ function App() {
         </Row>
         <Row className="block h-12 control pt-1">
           <Row className='flex justify-center'>
-            <Button className='mr-2' type='primary' onClick={handleStartEvent} disabled={state == 'start'}>Start</Button>
-            <Button type='primary' onClick={handleChangeSpeed} disabled={state == 'start' ? true : false}>Change Speed</Button>
+            <Button className='mr-2' type='primary' onClick={handleStartEvent} disabled={state == 'start' || flag == false}>Start</Button>
+            <Button type='primary' onClick={handleChangeSpeed} disabled={state == 'start' ? true : false}>Set Speed</Button>
           </Row>
-          <Row className='flex justify-center'>
+          {/* <Row className='flex justify-center'>
             {
               phase == 'Reset' && <p>Ideal Speed: {idealSpeed}</p>
             }
-          </Row>
+          </Row> */}
         </Row>
       </Spin>
     </div>

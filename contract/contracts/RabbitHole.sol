@@ -31,11 +31,22 @@ contract RabbitHole {
                 break;
             }
         }
-        players[i].fuel = 50;
         players[i].speed = speed;
         players[i].player = msg.sender;
-        if (i == numOfplayers)
+        if (i == numOfplayers) {
+            players[i].fuel = 50;
             numOfplayers++;
+        }
+    }
+
+    function setPlayerData(uint256 fuel) public {
+        uint i = 0;
+        for (i = 0; i < numOfplayers;i ++) {
+            if (players[i].player == msg.sender) {
+                break;
+            }
+        }
+        players[i].fuel = fuel;
     }
     
     function getPlayers() public view returns(GameData memory) {
