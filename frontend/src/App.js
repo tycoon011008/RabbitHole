@@ -13,7 +13,6 @@ import {
   Spin,
   Avatar
 } from 'antd';
-import { render } from '@testing-library/react';
 
 function App() {
   const [account, setAccount] = useState();
@@ -23,13 +22,14 @@ function App() {
   const [idealSpeed, setIdealSpeed] = useState(1);
   const [state, setState] = useState('ready');
   const [phase, setPhase] = useState('Default');
+  const [last, setLast] = useState('1');
 
   const ColorList = ['#f56a00', '#7265e6', '#ffbf00', '#87d068'];
   
   const [players, setPlayers] = useState([
-    {key: '1', id: 'Player 1', player: 'Bot 1', src: 'https://i.ibb.co/SN7JyMF/sheeepy.png', fuel: 50, speed: 5, status: 'ready'},
-    {key: '2', id: 'Player 2', player: 'Bot 2', src: 'https://i.ibb.co/vXGDsDD/blacksheep.png', fuel: 50, speed: 5, status: 'ready'},
-    {key: '3', id: 'Player 3', player: 'Player', src: 'https://i.ibb.co/SN7JyMF/sheeepy.png', fuel: 50, speed: 5, status: 'ready'}
+    {key: '1', id: 'Player 1', player: 'Bot 1', src: 'https://i.ibb.co/SN7JyMF/sheeepy.png', fuel: 50, speed: 5, status: 'ready', position: 0},
+    {key: '2', id: 'Player 2', player: 'Bot 2', src: 'https://i.ibb.co/vXGDsDD/blacksheep.png', fuel: 50, speed: 5, status: 'ready', position: 0},
+    {key: '3', id: 'Player 3', player: 'Player', src: 'https://i.ibb.co/SN7JyMF/sheeepy.png', fuel: 50, speed: 5, status: 'ready', position: 0}
   ])
 
   const columns = [
@@ -103,6 +103,36 @@ function App() {
   }
 
   const handleStartEvent = () => {
+    let data = players.sort((a, b) => b.speed - a.speed);
+    let pos = 0;
+    data = data.map((item, index) => {
+      if (index == 0) {
+        item.position = pos;
+      }
+      else {
+        if (parseFloat(item.speed) == parseFloat(data[index - 1].speed))
+          item.position = pos;
+        else {
+          item.position = pos + 1;
+          pos++;
+        }
+      }
+      return item;
+    })
+
+    setLast(pos);
+
+    setPlayers(players.map((item) => {
+      let idx = data.findIndex(ele => ele.id == item.id);
+      if (idx >= 0) {
+        return {
+          ...item,
+          position: data[idx].position
+        }
+      }
+      return item;
+    }))
+
     setState('start');
     setPhase('CloseTunnel'); // Close tunnel: Head moves to swallow everything. Open tunnel: cars get out
     setTimeout(() => setPhase('OpenTunnel'), 5000); 
@@ -126,7 +156,7 @@ function App() {
       setPlayers(players.map(item => {
         return {
           ...item,
-          status: parseFloat(item.fuel) >= 0 ? 'success' : 'failed'
+          status: parseFloat(item.fuel) >= 0 ? item.position == last ? last != 0 ? 'failed': 'success' : 'success' : 'failed'
         }
       }))
     }
@@ -134,30 +164,14 @@ function App() {
 
   return (
     <div className='h-100'>
-      <Spin className='h-100' tip="Loading..." size='large' spinning={isLoading}>
-        <Row className='h-25'>
-          <Col className='player-table' span={5}>
+      <Spin id="spin" tip="Loading..." size='large' style={{width: "100%", height: "100%"}} spinning={isLoading}>
+        <Row className='h-25 overflow-y scrollbar-none'>
+          <Col className='player-table' span={24}>
             <Table
               columns={columns}
               dataSource={players}
               pagination={false}
             />
-          </Col>
-          <Col className='p-2' span={9}>
-            <Button type='primary' onClick={connect}>
-              Connect
-            </Button>
-            <p></p>
-            {connected && (
-              <div>
-                <>
-                  {account && `Connected account: ${account}`}
-                </>
-              </div>
-            )}
-            {
-              phase == 'Reset' && <p>Ideal Speed: {idealSpeed}</p>
-            }
           </Col>
         </Row>
         <Row className='h-50 align-center'>
@@ -180,33 +194,40 @@ function App() {
             <RabbitTail phase={phase} />
           </div>
         </Row>
-        <Row className='h-12'>
-          <Col className='flex justify-end' span={11}>
+        <Row className='h-12 control'>
+          <Col className='flex justify-end h-full' span={11}>
             <div className="panel">
               <div className="number-display">1</div>
             </div>
           </Col>
-          <Col className='flex justify-center' span={2}>
+          <Col className='flex justify-center h-full' span={2}>
             <div className="lever-container">
               <Image className='center-img' src="https://i.ibb.co/fXQVWpW/Lever-handle.png" alt="Rotating Lever" id="lever" preview={false} />
             </div>
           </Col>
-          <Col span={11}>
+          <Col className='h-full' span={11}>
             <div className="panel">
               <div className="number-display">
                 <InputNumber
                   min={1}
                   max={10}
                   value={speed}
-                  onChange={e => setSpeed(e.valueOf())}
+                  onChange={e => e != null && setSpeed(e.valueOf())}
                 />
               </div>
             </div>
           </Col>
         </Row>
-        <Row className="flex justify-center h-12">
-          <Button className='mr-2' type='primary' onClick={handleStartEvent} disabled={state == 'start'}>Start</Button>
-          <Button type='primary' onClick={handleChangeSpeed} disabled={state == 'start' ? true : false}>Change Speed</Button>
+        <Row className="block h-12 control pt-1">
+          <Row className='flex justify-center'>
+            <Button className='mr-2' type='primary' onClick={handleStartEvent} disabled={state == 'start'}>Start</Button>
+            <Button type='primary' onClick={handleChangeSpeed} disabled={state == 'start' ? true : false}>Change Speed</Button>
+          </Row>
+          <Row className='flex justify-center'>
+            {
+              phase == 'Reset' && <p>Ideal Speed: {idealSpeed}</p>
+            }
+          </Row>
         </Row>
       </Spin>
     </div>
@@ -218,7 +239,7 @@ function RabbitHead({ phase }) {
     const head = document.querySelector('.rabbit-head');
     if (phase === 'CloseTunnel') {
      
-      head.style.transform = 'translateX(-130vw)'; 
+      head.style.transform = 'translateX(-150vw)'; 
     } else if (phase === 'OpenTunnel') { // it goes back in position
        head.style.visibility = 'hidden';
       head.style.transform = 'translateX(50vw)';
@@ -292,10 +313,10 @@ const PlayerMovement = ({ phase, players }) => {
       if (phase === 'Default' || phase === 'Reset') {
         setTimeout(() => {
           playerElement.style.transition = 'all 1.5s ease-out';
-          playerElement.style.left = '50%';
+          playerElement.style.left = '46%';
           playerElement.style.visibility = 'visible';
           playerElement.style.top = positionStyle;
-        }, index * 300);
+        }, player.position * 300);
       } else if (phase === 'CloseTunnel') {
         playerElement.style.left = '80%';
         setTimeout(() => {
@@ -303,7 +324,7 @@ const PlayerMovement = ({ phase, players }) => {
           playerElement.style.left = '-100%';
         }, 3000);
       } else if (phase === 'OpenTunnel') {
-        const delay = index * 1000;
+        const delay = player.position * 1000;
         setTimeout(() => {
           playerElement.style.top = positionStyle;
           playerElement.style.left = '150vw';
@@ -322,7 +343,7 @@ const PlayerMovement = ({ phase, players }) => {
   return (
     <div className="player-container">
       {sortedPlayers.map((player, index) => (
-        <img
+        player.status != 'failed' && <img
           key={player.id}
           ref={playerRefs.current[index]}
           src={player.src}

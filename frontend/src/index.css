@@ -24,6 +24,11 @@ body{
   overflow: hidden;
  
 }
+
+#root {
+  overflow: hidden;
+}
+
 .app-container {
   display: flex;
   flex-direction: column;
@@ -78,23 +83,47 @@ background: url('https://i.ibb.co/SybbN1D/tunnel-dark.png');
   top:-150px;
 }
 
+@media screen and (max-width: 600px) {
+  .rabbit-head {
+    right: -200px;
+    height: 350px;
+    top:-150px;
+  }    
+}
+
+@media screen and (max-width: 850px) {
+  .control {
+    padding-right: 0% !important;
+  }
+}
+
+.control {
+  padding-right: 4%;
+}
+
 .rabbit-tail {
   left: 100%;
   height: 150px;
 }
-
-
 
 .player-container img {
   transition: all 1.5s ease-out 0s;
   height: 50px;
    position: absolute;
    z-Index: 2;
-  left:-10px;
+  left: 46%;
 }
 
-/* /////////// */
 
+
+/* /////////// */
+.h-full {
+  height: 100%;
+}
+
+.pt-1 {
+  padding-top: 5px;
+}
 
 .control-panels{
   display: flex;
@@ -108,7 +137,7 @@ background: url('https://i.ibb.co/SybbN1D/tunnel-dark.png');
   background-size: cover;
   border:0;
   width: 100px;
-  height: 100px;
+  height: 100%;
   margin: 0 20px;
   display: flex;
   align-items: center;
@@ -116,16 +145,18 @@ background: url('https://i.ibb.co/SybbN1D/tunnel-dark.png');
 
 }
 
-
-
 .lever-container {
   background: url('https://i.ibb.co/FYqWdMW/Lever-Base.png') no-repeat center center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100px;
+  height: 100%;
   width:100px;
+}
+
+.block {
+  display: block;
 }
 
 /* Styles for the number display */
@@ -197,6 +228,10 @@ background: url('https://i.ibb.co/SybbN1D/tunnel-dark.png');
   height: 50%;
 }
 
+.w-100 {
+  width: 100%
+}
+
 .player-table {
   display: flex;
   align-items: center;
@@ -237,6 +272,14 @@ background: url('https://i.ibb.co/SybbN1D/tunnel-dark.png');
   margin-right: 2vw;
 }
 
-.ant-spin-container {
+#spin>.ant-spin-container {
   height: 100vh !important;
+}
+
+.overflow-y {
+  overflow-y: scroll;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
 }
