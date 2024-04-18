@@ -90,7 +90,7 @@ function App() {
     setIsLoading(true);
     const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914");
     const signer = new ethers.Wallet("0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c", provider);
-    const contract = new ethers.Contract("0xDaD08162b85b036F80Ed64DFE43e566a0D20a209", rabbit.abi, signer);
+    const contract = new ethers.Contract("0x50767280bAfecfEbaa564E47F454212fa91EEFBF", rabbit.abi, signer);
 
     const tx = await contract.setPlayerSpeed(speed * 100);
     await tx.wait();
@@ -107,19 +107,20 @@ function App() {
     setIsLoading(true);
     const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914");
     const signer = new ethers.Wallet("0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c", provider);
-    const contract = new ethers.Contract("0xDaD08162b85b036F80Ed64DFE43e566a0D20a209", rabbit.abi, signer);
+    const contract = new ethers.Contract("0x50767280bAfecfEbaa564E47F454212fa91EEFBF", rabbit.abi, signer);
     
     const tx = await contract.setPlayerSpeed(speed * 100);
     await tx.wait();
     
     const datas = await contract.getPlayers();
+    console.log(datas);
     setFlag(true);
     setIsLoading(false);
     // const datas = getData();
     let data = [
-      {fuel: parseInt(datas[0][0][1]), speed: parseInt(datas[0][0][2])},
-      {fuel: parseInt(datas[0][1][1]), speed: parseInt(datas[0][1][2])},
-      {fuel: parseInt(datas[0][2][1]), speed: parseInt(datas[0][2][2])},
+      {fuel: parseInt(datas[0][0][1]), speed: parseInt(datas[0][0][2]), alive: datas[0][0][3]},
+      {fuel: parseInt(datas[0][1][1]), speed: parseInt(datas[0][1][2]), alive: datas[0][1][3]},
+      {fuel: parseInt(datas[0][2][1]), speed: parseInt(datas[0][2][2]), alive: datas[0][2][3]},
     ];
     
     setIdealSpeed((parseInt(datas[1]) / 100).toFixed(0));
@@ -128,9 +129,12 @@ function App() {
       return {
         ...item,
         fuel: data[index].fuel,
-        speed: (data[index].speed / 100).toFixed(0)
+        speed: (data[index].speed / 100).toFixed(0),
+        status: data[index].alive == true ? 'ready' : 'failed'
       }
     }));
+    if (data[2].alive == false)
+      setFlag(false);
   }
 
   const handleStartEvent = () => {
@@ -219,10 +223,10 @@ function App() {
     setIsLoading(true);
     const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914");
     const signer = new ethers.Wallet("0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c", provider);
-    const contract = new ethers.Contract("0xDaD08162b85b036F80Ed64DFE43e566a0D20a209", rabbit.abi, signer);
+    const contract = new ethers.Contract("0x50767280bAfecfEbaa564E47F454212fa91EEFBF", rabbit.abi, signer);
 
     const index = players.findIndex(item => item.key == '3');
-    const tx = await contract.setPlayerData(players[index].fuel);
+    const tx = await contract.setPlayerData(players[index].fuel, players[index].status == 'success' ? true : false);
     await tx.wait();
     setIsLoading(false);
   }

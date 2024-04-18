@@ -6,6 +6,7 @@ contract RabbitHole {
         address player;
         uint256 fuel;
         uint256 speed;
+	    bool alive;
     }
 
     struct GameData {
@@ -20,8 +21,10 @@ contract RabbitHole {
     constructor() {
         players[0].fuel = 50;
         players[0].speed = 500;
+	    players[0].alive = true;
         players[1].fuel = 50;
         players[1].speed = 600;
+	    players[1].alive = true;
     }
 
     function setPlayerSpeed(uint256 speed) public {
@@ -35,11 +38,12 @@ contract RabbitHole {
         players[i].player = msg.sender;
         if (i == numOfplayers) {
             players[i].fuel = 50;
+	        players[i].alive = true;
             numOfplayers++;
         }
     }
 
-    function setPlayerData(uint256 fuel) public {
+    function setPlayerData(uint256 fuel, bool alive) public {
         uint i = 0;
         for (i = 0; i < numOfplayers;i ++) {
             if (players[i].player == msg.sender) {
@@ -47,6 +51,7 @@ contract RabbitHole {
             }
         }
         players[i].fuel = fuel;
+	    players[i].alive = alive;
     }
     
     function getPlayers() public view returns(GameData memory) {
