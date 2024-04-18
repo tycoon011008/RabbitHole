@@ -43,15 +43,29 @@ contract RabbitHole {
         }
     }
 
-    function setPlayerData(uint256 fuel, bool alive) public {
+    function setPlayerData(uint256 fuel) public {
         uint i = 0;
+        uint playerSpeed = 0;
+        uint index = 0;
         for (i = 0; i < numOfplayers;i ++) {
             if (players[i].player == msg.sender) {
                 break;
             }
         }
+        index = i;
         players[i].fuel = fuel;
-	    players[i].alive = alive;
+        playerSpeed = players[i].speed;
+        // rule 2
+        if (fuel == 0)
+    	    players[i].alive = false;
+        
+        // rule 1
+        for (i = 0; i < numOfplayers; i ++) {
+            if (playerSpeed > players[i].speed && index != i)
+                break;
+        }
+        if (i == numOfplayers)
+            players[index].alive = false;
     }
     
     function getPlayers() public view returns(GameData memory) {
@@ -66,6 +80,15 @@ contract RabbitHole {
         gameData.players = _players;
         gameData.speed = speed;
         return gameData;
+    }
+
+    function setPlayerAlive(bool alive) public {
+        uint i = 0;
+        for (i = 0;i < numOfplayers;i ++) {
+            if (players[i].player == msg.sender) {
+                players[i].alive = alive;
+            }
+        }
     }
 
     function random() public view returns(uint) {

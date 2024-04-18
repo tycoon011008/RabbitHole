@@ -15,6 +15,9 @@ import {
 } from 'antd';
 
 function App() {
+  const contractAddress = "0x6B0f5dBb5FF1398902DDEa5D2d13Dd27291AE21e";
+  const rpcUrl = "https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914";
+  const privateKey = "0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c";
   const [flag, setFlag] = useState(false);
   const [account, setAccount] = useState();
   const { sdk, connected, connecting, provider, chainId } = useSDK();
@@ -88,9 +91,9 @@ function App() {
 
   const getData = async () => {
     setIsLoading(true);
-    const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914");
-    const signer = new ethers.Wallet("0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c", provider);
-    const contract = new ethers.Contract("0x50767280bAfecfEbaa564E47F454212fa91EEFBF", rabbit.abi, signer);
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const signer = new ethers.Wallet(privateKey, provider);
+    const contract = new ethers.Contract(contractAddress, rabbit.abi, signer);
 
     const tx = await contract.setPlayerSpeed(speed * 100);
     await tx.wait();
@@ -105,9 +108,9 @@ function App() {
       return;
     }
     setIsLoading(true);
-    const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914");
-    const signer = new ethers.Wallet("0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c", provider);
-    const contract = new ethers.Contract("0x50767280bAfecfEbaa564E47F454212fa91EEFBF", rabbit.abi, signer);
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const signer = new ethers.Wallet(privateKey, provider);
+    const contract = new ethers.Contract(contractAddress, rabbit.abi, signer);
     
     const tx = await contract.setPlayerSpeed(speed * 100);
     await tx.wait();
@@ -188,12 +191,6 @@ function App() {
       }, 9000);
     }
     if (phase == 'Reset') {
-      setPlayers(players.map(item => {
-        return {
-          ...item,
-          status: parseFloat(item.fuel) >= 0 ? item.position == last ? last != 0 ? 'failed': 'success' : 'success' : 'failed'
-        }
-      }));
       setData();
     }
   }, [phase]);
@@ -221,14 +218,20 @@ function App() {
 
   const setData = async () => {
     setIsLoading(true);
-    const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914");
-    const signer = new ethers.Wallet("0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c", provider);
-    const contract = new ethers.Contract("0x50767280bAfecfEbaa564E47F454212fa91EEFBF", rabbit.abi, signer);
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const signer = new ethers.Wallet(privateKey, provider);
+    const contract = new ethers.Contract(contractAddress, rabbit.abi, signer);
 
     const index = players.findIndex(item => item.key == '3');
-    const tx = await contract.setPlayerData(players[index].fuel, players[index].status == 'success' ? true : false);
+    const tx = await contract.setPlayerData(players[index].fuel);
     await tx.wait();
     setIsLoading(false);
+    setPlayers(players.map(item => {
+        return {
+          ...item,
+          status: parseFloat(item.fuel) >= 0 ? item.position == last ? last != 0 ? 'failed': 'success' : 'success' : 'failed'
+        }
+    }));
   }
 
   return (
