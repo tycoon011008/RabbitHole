@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract RabbitHole {
+contract RabbitHole is Ownable {
     struct Player {
         address player;
         uint256 fuel;
@@ -9,84 +10,89 @@ contract RabbitHole {
 	    bool alive;
     }
 
-    struct GameData {
-        Player[] players;
-        uint speed;
-    }
+    // struct GameData {
+    //     Player[] players;
+    //     uint speed;
+    // }
 
     uint256 numOfplayers = 2;
 
-    mapping(uint256 => Player) private players;
+    Player[] private players;
+    // mapping(uint256 => Player) private players;
 
-    constructor() {
-        players[0].fuel = 50;
-        players[0].speed = 500;
-	    players[0].alive = true;
-        players[1].fuel = 50;
-        players[1].speed = 600;
-	    players[1].alive = true;
+    constructor(address initialAddress) Ownable(initialAddress) {
+        players.push(Player({
+            player: address(0),
+            fuel: 50,
+            speed: 500,
+            alive: true
+        }));
+        players.push(Player({
+            player: address(0),
+            fuel: 50,
+            speed: 600,
+            alive: true
+        }));
     }
 
     function setPlayerSpeed(uint256 speed) public {
         uint i = 0;
         for (i = 0; i < numOfplayers;i ++) {
             if (players[i].player == msg.sender) {
-                break;
+                players[i].speed = speed;
+                return;
             }
         }
-        players[i].speed = speed;
-        players[i].player = msg.sender;
-        if (i == numOfplayers) {
-            players[i].fuel = 50;
-	        players[i].alive = true;
-            numOfplayers++;
-        }
+        numOfplayers++;
+        players.push(Player({
+            player: msg.sender,
+            fuel: 50,
+            speed: speed,
+            alive: true
+        }));
     }
 
     function setPlayerData(uint256 fuel) public {
         uint i = 0;
-        uint playerSpeed = 0;
+        // uint playerSpeed = 0;
         uint index = 0;
         for (i = 0; i < numOfplayers;i ++) {
             if (players[i].player == msg.sender) {
-                break;
+                players[i].fuel = fuel;
+                if (fuel == 0)
+                    players[i].alive = false;
+                
+                for (index = 0;index<numOfplayers; index ++) {
+                    if(players[i].speed > players[index].speed && index != i) {
+                        return;
+                    }
+                }
+                players[i].alive = false;
             }
         }
-        index = i;
-        players[i].fuel = fuel;
-        playerSpeed = players[i].speed;
-        // rule 2
-        if (fuel == 0)
-    	    players[i].alive = false;
-        
-        // rule 1
-        for (i = 0; i < numOfplayers; i ++) {
-            if (playerSpeed > players[i].speed && index != i)
-                break;
-        }
-        if (i == numOfplayers)
-            players[index].alive = false;
     }
     
-    function getPlayers() public view returns(GameData memory) {
-        Player[] memory _players = new Player[](numOfplayers);
-        for(uint i = 0;i < numOfplayers;i ++) {
-            _players[i] = players[i];
-        }
+    function getPlayers() public view returns(Player[] memory) {
+        // Player[] memory _players = new Player[](numOfplayers);
+        // for(uint i = 0;i < numOfplayers;i ++) {
+        //     _players[i] = players[i];
+        // }
 
-        uint speed = random();
+        // uint speed = random();
 
-        GameData memory gameData;
-        gameData.players = _players;
-        gameData.speed = speed;
-        return gameData;
+        // GameData memory gameData;
+        // gameData.players = _players;
+        // gameData.speed = speed;
+        // return gameData;
+        return players;
     }
 
-    function setPlayerAlive(bool alive) public {
+    function setPlayerAlive(bool alive) public onlyOwner {
         uint i = 0;
         for (i = 0;i < numOfplayers;i ++) {
             if (players[i].player == msg.sender) {
                 players[i].alive = alive;
+                return;
             }
         }
     }

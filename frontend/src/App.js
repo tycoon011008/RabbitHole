@@ -15,7 +15,7 @@ import {
 } from 'antd';
 
 function App() {
-  const contractAddress = "0x6B0f5dBb5FF1398902DDEa5D2d13Dd27291AE21e";
+  const contractAddress = "0x57830C221Eb19d5f6d3Bc758e659F0709ef37e14";
   const rpcUrl = "https://sepolia.infura.io/v3/a27749044b104f099370a5b6c5ea2914";
   const privateKey = "0x244ac182355e773cef95391540ae9f73970798d17dc8330a3a03237e3e37ca7c";
   const [flag, setFlag] = useState(false);
@@ -116,14 +116,14 @@ function App() {
     await tx.wait();
     
     const datas = await contract.getPlayers();
-    console.log(datas);
+    console.log(datas[0][1]);
     setFlag(true);
     setIsLoading(false);
     // const datas = getData();
     let data = [
-      {fuel: parseInt(datas[0][0][1]), speed: parseInt(datas[0][0][2]), alive: datas[0][0][3]},
-      {fuel: parseInt(datas[0][1][1]), speed: parseInt(datas[0][1][2]), alive: datas[0][1][3]},
-      {fuel: parseInt(datas[0][2][1]), speed: parseInt(datas[0][2][2]), alive: datas[0][2][3]},
+      {fuel: parseInt(datas[0][1]), speed: parseInt(datas[0][2]), alive: datas[0][3]},
+      {fuel: parseInt(datas[1][1]), speed: parseInt(datas[1][2]), alive: datas[1][3]},
+      {fuel: parseInt(datas[2][1]), speed: parseInt(datas[2][2]), alive: datas[2][3]},
     ];
     
     setIdealSpeed((parseInt(datas[1]) / 100).toFixed(0));
