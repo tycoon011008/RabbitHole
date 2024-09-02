@@ -10,11 +10,6 @@ contract RabbitHole is Ownable {
 	    bool alive;
     }
 
-    // struct GameData {
-    //     Player[] players;
-    //     uint speed;
-    // }
-
     uint256 numOfplayers = 2;
 
     Player[] private players;
